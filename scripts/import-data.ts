@@ -196,7 +196,7 @@ async function importData() {
     if (sm.d.length === 0) continue;
 
     const products = sm.d.map((p) => {
-      const norm = normalizeName(p.n);
+      const norm = normalizeName(p.n, sm.n);
       const size = parseSize(p.s);
       const pricePerUnit =
         size.totalAmount && size.totalAmount > 0

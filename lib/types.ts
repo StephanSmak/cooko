@@ -46,3 +46,34 @@ export interface ProductGroup {
   baseUnit: string | null;
   baseAmount: number | null;
 }
+
+// UI types for the frontend
+export interface ProductInGroup {
+  id: number;
+  supermarket_id: string;
+  supermarket_name: string;
+  supermarket_logo_url: string | null;
+  raw_name: string;
+  price: number;
+  price_per_unit: number | null;
+  unit: string | null;
+  total_amount: number | null;
+  link: string | null;
+  is_huismerk: boolean;
+  // Debug / raw fields
+  name_normalized: string | null;
+  raw_size: string | null;
+  quantity: number | null;
+  multiplier: number | null;
+  brand: string | null;
+  product_description: string | null;
+}
+
+export interface ProductGroupResult {
+  id: number;
+  canonical_name: string;
+  match_type: string;
+  base_unit: string | null;
+  base_amount: number | null;
+  products: ProductInGroup[];
+}

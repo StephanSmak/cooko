@@ -4,19 +4,41 @@
 
 /** Known supermarket huismerk prefixes, ordered longest-first to avoid partial matches */
 const HUISMERK_PREFIXES: { prefix: string; supermarkets: string[] }[] = [
+  // Multi-word prefixes first (longest match wins)
   { prefix: "Poiesz Noordertrots", supermarkets: ["poiesz"] },
+  { prefix: "Altijd Handig", supermarkets: ["poiesz"] },
+  { prefix: "Bakker van der Akker", supermarkets: ["dirk"] },
+  { prefix: "Bits & Bites", supermarkets: ["dirk"] },
+  { prefix: "Ambachtelijke Bakker", supermarkets: ["spar"] },
   { prefix: "1 de Beste", supermarkets: ["dirk", "dekamarkt"] },
+  { prefix: "PLUS Puur", supermarkets: ["plus"] },
+  { prefix: "PLUS Boerentrots", supermarkets: ["plus"] },
   { prefix: "AH Excellent", supermarkets: ["ah"] },
   { prefix: "AH Biologisch", supermarkets: ["ah"] },
   { prefix: "AH Basic", supermarkets: ["ah"] },
   { prefix: "AH Terra", supermarkets: ["ah"] },
+  // Single-word prefixes
   { prefix: "G'woon", supermarkets: ["dekamarkt", "hoogvliet", "spar", "poiesz", "vomar"] },
   { prefix: "g'woon", supermarkets: ["dekamarkt", "hoogvliet", "spar", "poiesz", "vomar"] },
+  { prefix: "DekaVers", supermarkets: ["dekamarkt"] },
+  { prefix: "Vleeschmeesters", supermarkets: ["dirk"] },
+  { prefix: "BakkersHart", supermarkets: ["spar"] },
+  { prefix: "FoodClub", supermarkets: ["spar"] },
+  { prefix: "Beukeveld", supermarkets: ["spar"] },
+  { prefix: "Hoogvliet", supermarkets: ["hoogvliet"] },
+  { prefix: "Slagers", supermarkets: ["hoogvliet"] },
+  { prefix: "Vomar", supermarkets: ["vomar"] },
   { prefix: "PLUS", supermarkets: ["plus"] },
   { prefix: "Jumbo", supermarkets: ["jumbo"] },
   { prefix: "Spar", supermarkets: ["spar"] },
   { prefix: "AH", supermarkets: ["ah"] },
 ];
+
+/**
+ * Supermarkets where all products are huismerk by default (no A-brands in data).
+ * If a product from these supermarkets has no recognized prefix, it's still huismerk.
+ */
+const HUISMERK_ONLY_SUPERMARKETS = new Set(["aldi", "lidl"]);
 
 /** No shared brands — g'woon is treated as huismerk across all chains. */
 const SHARED_BRANDS: string[] = [];
@@ -141,7 +163,7 @@ function detectHuismerkPrefix(
  *   - brand = null
  *   - productDescription = cleaned name WITHOUT supermarket prefix (for cross-chain matching)
  */
-export function normalizeName(rawName: string): NormalizationResult {
+export function normalizeName(rawName: string, supermarketId?: string): NormalizationResult {
   const trimmed = rawName.trim();
 
   // Apply abbreviation expansion and quantity notation normalization before cleaning
@@ -169,6 +191,17 @@ export function normalizeName(rawName: string): NormalizationResult {
       isHuismerk: true,
       brand: null,
       productDescription: description,
+    };
+  }
+
+  // Fallback: supermarkets that only sell huismerk (Aldi, Lidl)
+  // All their products without a recognized prefix are still huismerk
+  if (supermarketId && HUISMERK_ONLY_SUPERMARKETS.has(supermarketId)) {
+    return {
+      nameNormalized: cleaned,
+      isHuismerk: true,
+      brand: null,
+      productDescription: cleaned,
     };
   }
 
