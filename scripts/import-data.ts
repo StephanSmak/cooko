@@ -506,14 +506,26 @@ async function saveGroups(
     const batch = validGroups.slice(i, i + BATCH_SIZE);
 
     const groupRows = batch.map((g) => {
-      const canonical = g.products.reduce((best, p) =>
-        p.raw_name.length > best.raw_name.length ? p : best
-      );
       const hasHuismerk = g.products.some((p) => p.is_huismerk);
       const sampleProduct = g.products[0];
 
+      let canonicalName: string;
+      if (hasHuismerk) {
+        // Use product_description (brand-stripped) for huismerk groups
+        const best = g.products.reduce((b, p) =>
+          p.product_description.length > b.product_description.length ? p : b
+        );
+        canonicalName = best.product_description;
+      } else {
+        // Use raw_name for A-brand groups
+        const best = g.products.reduce((b, p) =>
+          p.raw_name.length > b.raw_name.length ? p : b
+        );
+        canonicalName = best.raw_name;
+      }
+
       return {
-        canonical_name: canonical.raw_name,
+        canonical_name: canonicalName,
         match_type: hasHuismerk ? "huismerk_equivalent" : "a_brand_exact",
         base_unit: sampleProduct.unit,
         base_amount: sampleProduct.total_amount,
