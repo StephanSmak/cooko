@@ -1,0 +1,6 @@
+supabase
+python-dotenv
+rapidfuzz
+pint
+openai
+google-genai
